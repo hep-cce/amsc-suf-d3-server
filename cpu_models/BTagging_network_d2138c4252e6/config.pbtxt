@@ -1,0 +1,90 @@
+name: "BTagging_network_d2138c4252e6"
+platform: "onnxruntime_onnx"
+max_batch_size: 0
+
+input: [
+  {
+  name: "jet_features"
+  data_type: TYPE_FP32
+  dims: [ 1, 2 ]  
+},
+  {
+  name: "track_features"
+  data_type: TYPE_FP32
+  dims: [ -1, 24 ]  
+},
+  {
+  name: "flow_features"
+  data_type: TYPE_FP32
+  dims: [ -1, 5 ]  
+}  
+]
+output: [
+  {
+  name: "GN3PflowMuonsV00_pb"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3PflowMuonsV00_pc"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3PflowMuonsV00_ps"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3PflowMuonsV00_pud"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3PflowMuonsV00_pg"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3PflowMuonsV00_ptau"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3PflowMuonsV00_ptFromTruthDressedWZJet"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3PflowMuonsV00_pu"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3PflowMuonsV00_pquark"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3PflowMuonsV00_TrackOrigin"
+  data_type: TYPE_INT8
+  dims: [ -1 ]  
+},
+  {
+  name: "GN3PflowMuonsV00_VertexIndex"
+  data_type: TYPE_INT8
+  dims: [ -1 ]  
+},
+  {
+  name: "GN3PflowMuonsV00_TrackType"
+  data_type: TYPE_INT8
+  dims: [ -1 ]  
+}  
+]
+instance_group: [
+  {
+  count: 8
+  kind: KIND_CPU
+  
+}  
+]

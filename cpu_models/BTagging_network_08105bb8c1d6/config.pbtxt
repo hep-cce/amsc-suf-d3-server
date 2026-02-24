@@ -1,0 +1,75 @@
+name: "BTagging_network_08105bb8c1d6"
+platform: "onnxruntime_onnx"
+max_batch_size: 0
+
+input: [
+  {
+  name: "jet_features"
+  data_type: TYPE_FP32
+  dims: [ 1, 3 ]  
+},
+  {
+  name: "track_features"
+  data_type: TYPE_FP32
+  dims: [ -1, 20 ]  
+},
+  {
+  name: "flow_features"
+  data_type: TYPE_FP32
+  dims: [ -1, 4 ]  
+}  
+]
+output: [
+  {
+  name: "GN3XPV01_phtautauhad"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3XPV01_phbb"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3XPV01_phcc"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3XPV01_ptop"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3XPV01_pqcdbb"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3XPV01_pqcdbx"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3XPV01_pqcdcx"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3XPV01_pqcdll"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN3XPV01_pWqq"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+}  
+]
+instance_group: [
+  {
+  count: 8
+  kind: KIND_CPU
+  
+}  
+]

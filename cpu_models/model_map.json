@@ -1,0 +1,21 @@
+{
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BoostedJetTaggers/WConstituentTagger/July2025/model_WTagger_AntiKt10UFOSoftDrop_Transformer.onnx": "BoostedJetTaggers_model_WTagger_AntiKt_20dee9b757bc",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/TrigTauRec/00-11-02/dev/boosted_ditau_omni_model.onnx": "TrigTauRec_boosted_ditau_omni_m_969b9b207bc5",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BTagging/20250527/GN3V01/antikt4empflow/network.onnx": "BTagging_network_93a858f5c730",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BTagging/20231205/GN2v01/antikt4empflow/network_fold0.onnx": "BTagging_network_fold0_4812578c733e",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BTagging/20231205/GN2v01/antikt4empflow/network_fold1.onnx": "BTagging_network_fold1_9280d77c131c",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BTagging/20231205/GN2v01/antikt4empflow/network_fold2.onnx": "BTagging_network_fold2_25c6ad03db10",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BTagging/20231205/GN2v01/antikt4empflow/network_fold3.onnx": "BTagging_network_fold3_0558b4924c49",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx": "BTagging_network_09c2dddf15bf",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BTagging/20250213/GN3V00/antikt4empflow/network.onnx": "BTagging_network_cce6be90efd1",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BTagging/20250213/GN3PflowMuonsV00/antikt4empflow/network.onnx": "BTagging_network_d2138c4252e6",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BTagging/20230705/gn2xv01/antikt10ufo/network.onnx": "BTagging_network_9f8aadb82b76",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BTagging/20250310/GN2XTauV00/antikt10ufo/network.onnx": "BTagging_network_e8d5e9a3059b",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BTagging/20250912/GN3XPV01/antikt10ufo/network.onnx": "BTagging_network_08105bb8c1d6",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx": "JetCalibTools_bbJESJMS_calibFactor_80138d800ac5",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx": "JetCalibTools_bbJESJMS_calibFactor_fefb85f452f9",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BTagging/20250912/GN3EPCLV01/antikt4empflow/network.onnx": "BTagging_network_8085e6c5717c",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/MuonSelectorTools/TightNN_Experimental_18062025/model_DNN3norm_MC20ade.onnx": "MuonSelectorTools_model_DNN3norm_MC20a_32a0c8c3869b",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/MuonSelectorTools/TightNN_Experimental_18062025/model_DNN3norm_MC23ad.onnx": "MuonSelectorTools_model_DNN3norm_MC23a_6c85f2f384af",
+  "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BoostedJetTaggers/QGConstituentTagger/May2025/model_QGTagger_AntiKt04PFlow_Transformer_v2.onnx": "BoostedJetTaggers_model_QGTagger_AntiK_c73b3cba9e69"
+}

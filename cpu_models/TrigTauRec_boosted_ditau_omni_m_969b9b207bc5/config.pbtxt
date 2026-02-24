@@ -1,0 +1,50 @@
+name: "TrigTauRec_boosted_ditau_omni_m_969b9b207bc5"
+platform: "onnxruntime_onnx"
+max_batch_size: 0
+
+input: [
+  {
+  name: "input_features"
+  data_type: TYPE_FP32
+  dims: [ -1, 10, 11 ]  
+},
+  {
+  name: "input_points"
+  data_type: TYPE_FP32
+  dims: [ -1, 10, 2 ]  
+},
+  {
+  name: "input_mask"
+  data_type: TYPE_FP32
+  dims: [ -1, 10 ]  
+},
+  {
+  name: "input_jet"
+  data_type: TYPE_FP32
+  dims: [ -1, 15 ]  
+},
+  {
+  name: "input_time"
+  data_type: TYPE_FP32
+  dims: [ -1, 1 ]  
+}  
+]
+output: [
+  {
+  name: "output_1"
+  data_type: TYPE_FP32
+  dims: [ -1, 2 ]  
+},
+  {
+  name: "output_2"
+  data_type: TYPE_FP32
+  dims: [ -1, 15 ]  
+}  
+]
+instance_group: [
+  {
+  count: 8
+  kind: KIND_CPU
+  
+}  
+]

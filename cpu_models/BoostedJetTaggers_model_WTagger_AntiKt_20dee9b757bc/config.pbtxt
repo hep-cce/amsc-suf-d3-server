@@ -1,0 +1,35 @@
+name: "BoostedJetTaggers_model_WTagger_AntiKt_20dee9b757bc"
+platform: "onnxruntime_onnx"
+max_batch_size: 0
+
+input: [
+  {
+  name: "cons_features"
+  data_type: TYPE_FP32
+  dims: [ -1, 7, -1 ]  
+},
+  {
+  name: "cons_pair_features"
+  data_type: TYPE_FP32
+  dims: [ -1, 4, -1, -1 ]  
+},
+  {
+  name: "cons_mask"
+  data_type: TYPE_FP32
+  dims: [ -1, 1, -1 ]  
+}  
+]
+output: [
+  {
+  name: "softmax"
+  data_type: TYPE_FP32
+  dims: [ -1, 2 ]  
+}  
+]
+instance_group: [
+  {
+  count: 8
+  kind: KIND_CPU
+  
+}  
+]

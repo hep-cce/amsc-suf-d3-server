@@ -1,0 +1,50 @@
+name: "BTagging_network_09c2dddf15bf"
+platform: "onnxruntime_onnx"
+max_batch_size: 0
+
+input: [
+  {
+  name: "jet_features"
+  data_type: TYPE_FP32
+  dims: [ 1, 2 ]  
+},
+  {
+  name: "track_features"
+  data_type: TYPE_FP32
+  dims: [ -1, 20 ]  
+},
+  {
+  name: "flow_features"
+  data_type: TYPE_FP32
+  dims: [ -1, 4 ]  
+}  
+]
+output: [
+  {
+  name: "GN2Xv02_phbb"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN2Xv02_phcc"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN2Xv02_ptop"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "GN2Xv02_pqcd"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+}  
+]
+instance_group: [
+  {
+  count: 8
+  kind: KIND_CPU
+  
+}  
+]

@@ -1,0 +1,45 @@
+name: "BTagging_network_9f8aadb82b76"
+platform: "onnxruntime_onnx"
+max_batch_size: 0
+
+input: [
+  {
+  name: "jet_features"
+  data_type: TYPE_FP32
+  dims: [ 1, 3 ]  
+},
+  {
+  name: "track_features"
+  data_type: TYPE_FP32
+  dims: [ -1, 19 ]  
+}  
+]
+output: [
+  {
+  name: "phbb"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "phcc"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "ptop"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+},
+  {
+  name: "pqcd"
+  data_type: TYPE_FP32
+  dims: [ 1 ]  
+}  
+]
+instance_group: [
+  {
+  count: 8
+  kind: KIND_CPU
+  
+}  
+]

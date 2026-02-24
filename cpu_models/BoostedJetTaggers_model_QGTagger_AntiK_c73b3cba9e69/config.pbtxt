@@ -1,0 +1,30 @@
+name: "BoostedJetTaggers_model_QGTagger_AntiK_c73b3cba9e69"
+platform: "onnxruntime_onnx"
+max_batch_size: 0
+
+input: [
+  {
+  name: "const_vars"
+  data_type: TYPE_FP32
+  dims: [ -1, -1, 7 ]  
+},
+  {
+  name: "interaction_vars"
+  data_type: TYPE_FP32
+  dims: [ -1, -1, -1, 4 ]  
+}  
+]
+output: [
+  {
+  name: "dense"
+  data_type: TYPE_FP32
+  dims: [ -1, 1 ]  
+}  
+]
+instance_group: [
+  {
+  count: 8
+  kind: KIND_CPU
+  
+}  
+]

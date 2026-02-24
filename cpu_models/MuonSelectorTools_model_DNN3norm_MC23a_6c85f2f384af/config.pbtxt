@@ -1,0 +1,25 @@
+name: "MuonSelectorTools_model_DNN3norm_MC23a_6c85f2f384af"
+platform: "onnxruntime_onnx"
+max_batch_size: 0
+
+input: [
+  {
+  name: "args_0"
+  data_type: TYPE_FP32
+  dims: [ -1, 24 ]  
+}  
+]
+output: [
+  {
+  name: "sequential"
+  data_type: TYPE_FP32
+  dims: [ -1, 1 ]  
+}  
+]
+instance_group: [
+  {
+  count: 8
+  kind: KIND_CPU
+  
+}  
+]
