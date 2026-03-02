@@ -34,3 +34,8 @@ parameters: {
   key: "compiling",
   value: {string_value: "False"}
 }
+
+parameters: {
+  key: "save_inputs_to_json",
+  value: {string_value: "False"}
+}

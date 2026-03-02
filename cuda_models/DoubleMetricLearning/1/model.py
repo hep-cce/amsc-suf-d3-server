@@ -55,6 +55,9 @@ class TritonPythonModel:
             auto_cast=auto_cast,
             compiling=compiling,
         )
+        self.save_data_to_json = get_parameter("save_inputs_to_json").lower() == "true"
+        self.save_json_dir = Path("input_json") / "DML"
+        self.save_json_dir.mkdir(parents=True, exist_ok=True)
 
         self.inference = MetricLearningInference(config)
 
@@ -94,6 +97,12 @@ class TritonPythonModel:
         for request in requests:
             features = pb_utils.get_input_tensor_by_name(request, "FEATURES")
             features = from_dlpack(features.to_dlpack()).to(self.model_instance_device_id)
+
+            if self.save_data_to_json:
+                features_cpu = features.cpu().numpy().flatten()
+                save_path = self.save_json_dir / f"features_{request.id}.json"
+                with open(save_path, "w") as f:
+                    json.dump(features_cpu.tolist(), f, indent=2)
 
             track_ids = (
                 self.inference(features)
