@@ -101,11 +101,17 @@ class TritonPythonModel:
             features = from_dlpack(features.to_dlpack()).to(self.model_instance_device_id)
 
             if self.save_data_to_json:
-                features_cpu = features.cpu().numpy().flatten()
+                features_cpu = features.cpu().numpy().flatten().tolist()
+                json_data = {
+                     "FEATURES": {
+                         "content": features_cpu,
+                         "shape": [features.shape[0], features.shape[1]],
+                     }
+                }
                 self.counter += 1
                 save_path = self.save_json_dir / f"features_{self.counter}.json"
                 with open(save_path, "w") as f:
-                    json.dump(features_cpu.tolist(), f, indent=2)
+                    json.dump(json_data, f, indent=2)
 
             track_ids = (
                 self.inference(features)
