@@ -56,8 +56,9 @@ class TritonPythonModel:
             compiling=compiling,
         )
         self.save_data_to_json = get_parameter("save_inputs_to_json").lower() == "true"
-        self.save_json_dir = Path("input_json") / "DML"
-        self.save_json_dir.mkdir(parents=True, exist_ok=True)
+        if self.save_data_to_json:
+            self.save_json_dir = Path("input_json") / "DML"
+            self.save_json_dir.mkdir(parents=True, exist_ok=True)
 
         self.inference = MetricLearningInference(config)
 
