@@ -59,6 +59,7 @@ class TritonPythonModel:
         if self.save_data_to_json:
             self.save_json_dir = Path("input_json") / "DML"
             self.save_json_dir.mkdir(parents=True, exist_ok=True)
+            self.counter = 0
 
         self.inference = MetricLearningInference(config)
 
@@ -101,7 +102,8 @@ class TritonPythonModel:
 
             if self.save_data_to_json:
                 features_cpu = features.cpu().numpy().flatten()
-                save_path = self.save_json_dir / f"features_{request.id}.json"
+                self.counter += 1
+                save_path = self.save_json_dir / f"features_{self.counter}.json"
                 with open(save_path, "w") as f:
                     json.dump(features_cpu.tolist(), f, indent=2)
 
