@@ -2,7 +2,6 @@ import json
 import os
 from pathlib import Path
 
-import numpy as np
 import onnxruntime as ort
 import triton_python_backend_utils as pb_utils
 
@@ -12,7 +11,7 @@ class TritonPythonModel:
         """
         Initialize the ONNX session. 'args' contains the model path.
         """
-        self.model_config = pb_utils.get_model_config_parse_details(args['model_config'])
+        self.model_config = json.loads(args["model_config"])
 
         # Determine the path to the model file relative to this script
         model_path = os.path.join(args['model_repository'], args['model_version'], 'model.onnx')
@@ -22,6 +21,12 @@ class TritonPythonModel:
 
         # Pre-fetch output names from ONNX to ensure correct mapping
         self.output_names = [output.name for output in self.session.get_outputs()]
+
+        parameters = self.model_config["parameters"]
+        def get_parameter(name):
+            if name not in parameters:
+                raise ValueError(f"Parameter {name} is required but not provided.")
+            return parameters[name]["string_value"]
 
         self.save_data_to_json = get_parameter("save_inputs_to_json").lower() == "true"
         if self.save_data_to_json:
