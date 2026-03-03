@@ -1,6 +1,5 @@
 name: "BTagging_network_8085e6c5717c"
-platform: "onnxruntime_onnx"
-max_batch_size: 0
+backend: "python"
 
 input: [
   {
