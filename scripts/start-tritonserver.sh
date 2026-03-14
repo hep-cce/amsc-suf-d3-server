@@ -2,14 +2,18 @@
 
 OUTPUTFILE="node_id.txt"
 MODEL_NAME=""
+MODEL_FOLDER="models"
 
-while getopts "o:m:" opt; do
+while getopts "o:m:f:" opt; do
   case $opt in
     o)
       OUTPUTFILE=$OPTARG
       ;;
     m)
       MODEL_NAME=$OPTARG
+      ;;
+    f)
+      MODEL_FOLDER=$OPTARG
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -23,8 +27,8 @@ OUTPUTFILE="$(realpath $OUTPUTFILE)"
 
 WORK_DIR="$(dirname "${BASH_SOURCE[0]}" )/../"
 WORK_DIR=$(readlink -f $WORK_DIR)
-TRITON_MODELS="${WORK_DIR}/models"
-TRITON_IMAGE="docker.io/alinutzal/tritonserver:latest"
+TRITON_MODELS="${WORK_DIR}/${MODEL_FOLDER}"
+TRITON_IMAGE="docker.io/docexoty/tritonserver:latest"
 echo "Using Triton image: $TRITON_IMAGE"
 
 TRITON_JOBS_DIR="${WORK_DIR}/jobs"
