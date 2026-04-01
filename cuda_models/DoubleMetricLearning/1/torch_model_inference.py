@@ -3,6 +3,7 @@ from torch_geometric.utils import sort_edge_index
 
 dtype = torch.float16
 
+
 def check_autocast_support(device_type: str):
     if torch.__version__ < "2.4.0":
         return device_type == "cuda"
@@ -11,8 +12,7 @@ def check_autocast_support(device_type: str):
 
 def run_torch_model(model: torch.nn.Module, auto_cast: bool, *inputs):
     assert len(inputs) > 0, "At least one input must be provided."
-    with torch.inference_mode():
-        # device = next(model.parameters()).device
+    with torch.no_grad():
         device_type = inputs[0].device.type
         if auto_cast and check_autocast_support(device_type):
             with torch.autocast(device_type, dtype=dtype):
