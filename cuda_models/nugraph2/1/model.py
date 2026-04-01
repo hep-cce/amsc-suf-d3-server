@@ -41,7 +41,7 @@ class HitGraphProducer():
         self.transform = pyg.transforms.Compose((
             pyg.transforms.Delaunay(),
             pyg.transforms.FaceToEdge()))
-    
+
     def create_graph(self, hit_table_hit_id, hit_table_local_plane, hit_table_local_time, \
                     hit_table_local_wire, hit_table_integral, hit_table_rms, \
                     spacepoint_table_spacepoint_id, spacepoint_table_hit_id_u, spacepoint_table_hit_id_v, \
@@ -55,7 +55,7 @@ class HitGraphProducer():
                 'spacepoint_id':spacepoint_table_spacepoint_id, 'hit_id_u':spacepoint_table_hit_id_u, \
                 'hit_id_v':spacepoint_table_hit_id_v, 'hit_id_y':spacepoint_table_hit_id_y
             })
-                                
+
         }
         if self.event_labeller or self.label_vertex:
             event = evt['event_table'].squeeze()
@@ -172,9 +172,9 @@ class HitGraphProducer():
         if self.label_vertex:
             vtx_3d = [ [ event.nu_vtx_corr_x, event.nu_vtx_corr_y, event.nu_vtx_corr_z ] ]
             data['evt'].y_vtx = torch.tensor(vtx_3d).float()
-        
+
         return data
-    
+
 class HeteroDataset(Dataset):
     def __init__(self, hetero_data, transform=None):
         super().__init__(transform=transform)
@@ -185,7 +185,7 @@ class HeteroDataset(Dataset):
         return 1
     def get(self, idx=0):
         return self.transform(self.hetero_data)
-    
+
 class NuGraph2_model(nn.Module):
     """
     Simple AddSub network in PyTorch. This network outpxuts the sum and
@@ -197,7 +197,7 @@ class NuGraph2_model(nn.Module):
         self.MODEL = ng.models.nugraph2.NuGraph2
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         modelpath = os.path.dirname(os.path.abspath(__file__))
-        self.model = self.MODEL.load_from_checkpoint(os.path.join(modelpath, "test-ng2.ckpt"), map_location=self.device)
+        self.model = self.MODEL.load_from_checkpoint(os.path.join(modelpath, "test-ng2.ckpt"), map_location=self.device, weights_only=False)
         self.planes = ['u', 'v', 'y']
         self.norm = {'u':torch.tensor(np.array([[389.00623, 173.41809, 144.40556, 4.558202 ], [148.03027, 78.83374, 223.77074, 2.2621164]]).astype(np.float32)),
                      'v':torch.tensor(np.array([[369.14136, 173.47131, 151.55148, 4.452483 ], [145.24632, 81.39258, 298.7041 , 1.9223225]]).astype(np.float32)),
@@ -209,7 +209,7 @@ class NuGraph2_model(nn.Module):
                     hit_table_local_wire, hit_table_integral, hit_table_rms, \
                     spacepoint_table_spacepoint_id, spacepoint_table_hit_id_u, spacepoint_table_hit_id_v, \
                     spacepoint_table_hit_id_y):
-        
+
         gnn_hetero_data = self.hitgraph.create_graph(hit_table_hit_id, hit_table_local_plane, hit_table_local_time, \
                                                     hit_table_local_wire, hit_table_integral, hit_table_rms, \
                                                     spacepoint_table_spacepoint_id, spacepoint_table_hit_id_u, spacepoint_table_hit_id_v, \
@@ -330,14 +330,14 @@ class TritonPythonModel:
             spacepoint_table_hit_id_u = pb_utils.get_input_tensor_by_name(request, "spacepoint_table_hit_id_u")
             spacepoint_table_hit_id_v = pb_utils.get_input_tensor_by_name(request, "spacepoint_table_hit_id_v")
             spacepoint_table_hit_id_y = pb_utils.get_input_tensor_by_name(request, "spacepoint_table_hit_id_y")
-            
+
             output1, output2, output3, output4, output5, output6 = \
                                         self.NuGraph2_model(hit_table_hit_id.as_numpy(), hit_table_local_plane.as_numpy(), \
                                                     hit_table_local_time.as_numpy(), \
                     hit_table_local_wire.as_numpy(), hit_table_integral.as_numpy(), hit_table_rms.as_numpy(), \
                     spacepoint_table_spacepoint_id.as_numpy(), spacepoint_table_hit_id_u.as_numpy(), spacepoint_table_hit_id_v.as_numpy(), \
                     spacepoint_table_hit_id_y.as_numpy())
-        
+
 
             # Create output tensors. You need pb_utils.Tensor
             # objects to create pb_utils.InferenceResponse.

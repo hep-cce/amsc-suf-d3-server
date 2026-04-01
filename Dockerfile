@@ -65,8 +65,9 @@ RUN cd /tmp/ \
 		python setup.py install && \
 	rm -rf /tmp/prefix_sum && rm -rf /tmp/FRNN
 
-
 RUN  cd / && \
      git clone -b cerati/ng2-feature-extension-triton https://github.com/cerati/nugraph.git && \
      pip3 install --no-deps -e ./nugraph && \
      pip3 install matplotlib pynvml~=11.5 seaborn~=0.13 scikit-learn~=1.5 pytorch_lightning~=2.3 pynuml~=23.11
+
+RUN pip install numba
