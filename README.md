@@ -14,4 +14,5 @@ srun --job-name=TritonTest -C "gpu&hbm80g" -N 1 -G 1 -c 10 -n 1 -t 4:00:00 -A m3
 ```bash
 podman-hpc build --format docker -f Dockerfile -t docexoty/tritonserver:light
 podman-hpc push localhost/docexoty/tritonserver:light docker.io/docexoty/tritonserver:light
+podman-hpc pull docker.io/docexoty/tritonserver:light
 ```
