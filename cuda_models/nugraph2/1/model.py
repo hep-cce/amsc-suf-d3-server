@@ -10,11 +10,7 @@ from typing import Callable
 from torch import nn
 from torch_geometric.transforms import Compose
 from torch_geometric.data import Dataset
-# triton_python_backend_utils is available in every Triton Python model. You
-# need to use this module to create inference requests and responses. It also
-# contains some utility functions for extracting information from model_config
-# and converting Triton input/output types to numpy types.
-import triton_python_backend_utils as pb_utils
+
 
 class HitGraphProducer():
     def __init__(self,
@@ -228,6 +224,21 @@ class NuGraph2_model(nn.Module):
                 x['u']['x_filter'].cpu().detach().numpy(), x['v']['x_filter'].cpu().detach().numpy(), \
                 x['y']['x_filter'].cpu().detach().numpy()
 
+def main_fn():
+    import json
+    json_data = "/global/homes/x/xju/m3443/data/AmSC_SUF_D3/BenchmarkData/microbone_nugraph2_100evts.json"
+    data = json.load(open(json_data))["data"]
+    model = NuGraph2_model()
+    for event in data:
+        out = model(event['hit_table_hit_id']['content'], event['hit_table_local_plane']["content"],
+                    event['hit_table_local_time']["content"],
+                    event['hit_table_local_wire']['content'], event['hit_table_integral']['content'],
+                    event['hit_table_rms']['content'], event['spacepoint_table_spacepoint_id']['content'],
+                    event['spacepoint_table_hit_id_u']['content'], event['spacepoint_table_hit_id_v']['content'],
+                    event['spacepoint_table_hit_id_y']['content'])
+        print(out)
+        break
+
 class TritonPythonModel:
     """Your Python model must use the same class name. Every Python model
     that is created must have "TritonPythonModel" as the class name.
@@ -249,6 +260,12 @@ class TritonPythonModel:
           * model_version: Model version
           * model_name: Model name
         """
+
+        # triton_python_backend_utils is available in every Triton Python model. You
+        # need to use this module to create inference requests and responses. It also
+        # contains some utility functions for extracting information from model_config
+        # and converting Triton input/output types to numpy types.
+        import triton_python_backend_utils as pb_utils
 
         # You must parse model_config. JSON string is not parsed here
         self.model_config = model_config = json.loads(args["model_config"])
@@ -304,6 +321,7 @@ class TritonPythonModel:
           A list of pb_utils.InferenceResponse. The length of this list must
           be the same as `requests`
         """
+        import triton_python_backend_utils as pb_utils
 
         x_semantic_u_dtype = self.x_semantic_u_dtype
         x_semantic_v_dtype = self.x_semantic_v_dtype
@@ -363,3 +381,7 @@ class TritonPythonModel:
         the model to perform any necessary clean ups before exit.
         """
         print("Cleaning up...")
+
+
+if __name__ == "__main__":
+    main_fn()

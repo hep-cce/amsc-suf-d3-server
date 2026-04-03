@@ -5,8 +5,6 @@ FROM nvcr.io/nvidia/tritonserver:24.05-py3
 # cudnn version: 9.1.0  ## find / -name "libcudnn*" 2>/dev/null
 # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tritonserver
 
-LABEL description="Triton Server backend with other dependencies for Tracking-as-a-Service"
-LABEL version="1.0"
 
 # Install dependencies
 # Update the CUDA Linux GPG Repository Key
@@ -51,7 +49,7 @@ ENV PYTHONNOUSERSITE=True
 RUN pip3 install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
 RUN pip3 install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.6.0+cu124.html
 
-RUN pip3 install torch_geometric lightning>=2.2
+RUN pip3 install torch_geometric lightning>=2.2 numba
 
 # FRNN
 RUN cd /tmp/ \
@@ -70,4 +68,15 @@ RUN  cd / && \
      pip3 install --no-deps -e ./nugraph && \
      pip3 install matplotlib pynvml~=11.5 seaborn~=0.13 scikit-learn~=1.5 pytorch_lightning~=2.3 pynuml~=23.11
 
-RUN pip install numba
+RUN python3 -c 'import nugraph os, re; \
+path = os.path.dirname(nugraph.__file__); \
+for root, _, files in os.walk(path): \
+    for f in files: \
+        if f.endswith(".py"): \
+            fpath = os.path.join(root, f); \
+            with open(fpath, "r") as r: content = r.read(); \
+            if "BaseTransform" in content: \
+                new_content = re.sub(r"def\s+__call__\s*\(", "def forward(", content); \
+                if new_content != content: \
+                    with open(fpath, "w") as w: w.write(new_content); \
+                    print(f"Updated {fpath}")'
