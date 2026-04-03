@@ -68,15 +68,20 @@ RUN  cd / && \
      pip3 install --no-deps -e ./nugraph && \
      pip3 install matplotlib pynvml~=11.5 seaborn~=0.13 scikit-learn~=1.5 pytorch_lightning~=2.3 pynuml~=23.11
 
-RUN python3 -c 'import nugraph os, re; \
-path = os.path.dirname(nugraph.__file__); \
-for root, _, files in os.walk(path): \
-    for f in files: \
-        if f.endswith(".py"): \
-            fpath = os.path.join(root, f); \
-            with open(fpath, "r") as r: content = r.read(); \
-            if "BaseTransform" in content: \
-                new_content = re.sub(r"def\s+__call__\s*\(", "def forward(", content); \
-                if new_content != content: \
-                    with open(fpath, "w") as w: w.write(new_content); \
-                    print(f"Updated {fpath}")'
+RUN python3 <<EOF
+import os, re, nugraph
+path = os.path.dirname(nugraph.__file__)
+for root, _, files in os.walk(path):
+    for f in files:
+        if f.endswith(".py"):
+            fpath = os.path.join(root, f)
+            with open(fpath, "r") as r:
+                content = r.read()
+            if "BaseTransform" in content:
+                # Replace __call__ with forward only in classes inheriting BaseTransform
+                new_content = re.sub(r"def\s+__call__\s*\(", "def forward(", content)
+                if new_content != content:
+                    with open(fpath, "w") as w:
+                        w.write(new_content)
+                    print(f"Updated: {fpath}")
+EOF
