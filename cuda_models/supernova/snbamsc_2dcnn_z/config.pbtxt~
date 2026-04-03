@@ -1,0 +1,26 @@
+name: "snbamsc_2dcnn_z"
+platform: "tensorflow_savedmodel"
+
+
+max_batch_size: 64
+
+input [
+  {
+    name: "zero_padding2d_1_input"
+    data_type: TYPE_FP32
+    dims: [ 480, 128, 1 ]
+  }
+]
+
+output [
+  {
+    name: "dense_1"
+    data_type: TYPE_FP32
+    dims: [ 2 ]
+  }
+]
+
+
+instance_group [
+  { kind: KIND_GPU count: 1 }
+]
