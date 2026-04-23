@@ -67,5 +67,8 @@ podman-hpc run -it --rm --gpu --shm-size=20GB -p 8002:8002 -p 8001:8001 -p 8000:
     tritonserver \
         $TRITON_MODEL_FLAGS \
         --allow-metrics=true \
+        --allow-gpu-metrics=false \
+        --backend-config=onnxruntime,enable-global-threadpool=1 \
+        --backend-config=onnxruntime,intra_op_thread_count=1, --backend-config=onnxruntime,inter_op_thread_count=1 \
         $TRITON_LOG_VERBOSE_FLAGS  2>&1 \
         | tee $TRITON_JOBS_DIR/$TRITON_SEVER_NAME.log

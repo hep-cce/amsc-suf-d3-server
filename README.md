@@ -10,6 +10,13 @@ srun --job-name=TritonTest -C "gpu&hbm40g" -N 1 -G 1 -c 10 -n 1 -t 4:00:00 -A m3
   -f cuda_models"
 ```
 
+### A local server on CPUs
+```bash
+srun --job-name=TritonTest -C cpu -N 1 --exclusive -t 4:00:00 -A m3443 \
+  -q interactive /bin/bash -c "./scripts/start-tritonserver.sh -o triton_ready.txt \
+  -f staged_models "
+```
+
 ### Start the container for debugging
 ```bash
 podman-hpc run --rm -it --gpus all --ipc=host --net=host --pid=host \
