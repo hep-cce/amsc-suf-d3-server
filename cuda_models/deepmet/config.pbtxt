@@ -1,0 +1,49 @@
+name: "deepmet"
+platform: "tensorflow_graphdef"
+version_policy {
+  all {
+  }
+}
+max_batch_size: 100
+input [{
+  name: "input"
+  data_type: TYPE_FP32
+  dims: [4500, 8]
+}, {
+  name: "input_cat0"
+  data_type: TYPE_FP32
+  dims: [4500, 1]
+}, {
+  name: "input_cat1"
+  data_type: TYPE_FP32
+  dims: [4500, 1]
+}, {
+  name: "input_cat2"
+  data_type: TYPE_FP32
+  dims: [4500, 1]
+}]
+output [{
+  name: "output/BiasAdd"
+  data_type: TYPE_FP32
+  dims: [2]
+}]
+dynamic_batching {
+  preferred_batch_size: [8, 16]
+}
+model_repository_agents {
+  agents [{
+    name: "checksum"
+    parameters {
+      key: "MD5:1/model.graphdef"
+      value: "9fdc487afe835467983c0bb0b2d50c3f"
+    }
+    parameters {
+      key: "MD5:2/model.graphdef"
+      value: "97b53089661709e24c7407d129d24e2e"
+    }
+    parameters {
+      key: "MD5:3/model.graphdef"
+      value: "111604a59f237dd49756fbfed24990db"
+    }
+  }]
+}
