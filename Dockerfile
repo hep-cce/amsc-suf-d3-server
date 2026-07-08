@@ -1,10 +1,12 @@
 # syntax=docker/dockerfile:experimental
 
-FROM nvcr.io/nvidia/tritonserver:24.05-py3
-# nvcc version: 12.4 ## nvcc --version
-# cudnn version: 9.1.0  ## find / -name "libcudnn*" 2>/dev/null
+FROM nvcr.io/nvidia/tritonserver:26.06-py3
+# nvcc version: 13.3 ## nvcc --version
+# cudnn version: 9.23.0  ## find / -name "libcudnn*" 2>/dev/null
 # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tritonserver
 
+ARG LIB_WITH_CUDA=ON
+ARG NPROC=6
 
 # Install dependencies
 # Update the CUDA Linux GPG Repository Key
@@ -25,8 +27,19 @@ RUN apt-get update -y && apt-get install -y \
      qtwebengine5-dev nlohmann-json3-dev libmysqlclient-dev libxxhash-dev \
   && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN ln -sf /usr/bin/python3 /usr/bin/python
 RUN pip3 install --upgrade pip
+
+# Environment variables
+ENV FORCE_CUDA=1
+ENV TORCH_SITE_PATH="/opt/torch"
+ENV TORCH_LIB_PATH="${TORCH_SITE_PATH}/lib"
+ENV LD_LIBRARY_PATH="${TORCH_LIB_PATH}:/opt/tritonserver/backends/pytorch:$LD_LIBRARY_PATH:/usr/lib:/usr/local/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64"
+ENV GET="curl --location --silent --create-dirs"
+ENV UNPACK_TO_SRC="tar -xz --strip-components=1 --directory src"
+ENV PREFIX="/usr/local"
+ENV TORCH_CUDA_ARCH_LIST="80"
+ENV PYTHONNOUSERSITE=True
 
 # Manual builds for specific packages
 # Install CMake v3.29.4
@@ -37,19 +50,28 @@ RUN cd /tmp && mkdir -p src \
   && rsync -ru src/ ${PREFIX} \
   && cd /tmp && rm -rf /tmp/src
 
-
-# Environment variables
-ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib:/usr/local/lib"
-ENV GET="curl --location --silent --create-dirs"
-ENV UNPACK_TO_SRC="tar -xz --strip-components=1 --directory src"
-ENV PREFIX="/usr/local"
-ENV TORCH_CUDA_ARCH_LIST="80"
-ENV PYTHONNOUSERSITE=True
-
 RUN pip3 install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
-RUN pip3 install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.6.0+cu124.html
+RUN ln -s "$(python3 -c 'import os, torch; print(os.path.dirname(torch.__file__))')" "${TORCH_SITE_PATH}"
+RUN pip3 install pyg_lib -f https://data.pyg.org/whl/torch-2.6.0+cu124.html
 
-RUN pip3 install torch_geometric lightning>=2.2 numba
+RUN mkdir -p /torch_geometric/lib \
+  && cd /tmp \
+  && for repo in pytorch_cluster pytorch_scatter pytorch_spline_conv pytorch_sparse; do \
+       git clone https://github.com/rusty1s/${repo}.git; \
+       cd ${repo}; \
+       pip3 install .; \
+       mkdir build; \
+       cd build; \
+       cmake -DCMAKE_PREFIX_PATH=${TORCH_SITE_PATH} -DWITH_CUDA=${LIB_WITH_CUDA} ..; \
+       make -j ${NPROC}; \
+       mv ./*.so /torch_geometric/lib/; \
+       cd /tmp; \
+       rm -rf ${repo}; \
+     done
+
+RUN pip3 install torch_geometric "lightning>=2.2" numba
+
+RUN python3 -c "import torch; print(torch.__version__, torch.version.cuda)"
 
 # FRNN
 RUN cd /tmp/ \
@@ -69,8 +91,8 @@ RUN  cd / && \
      pip3 install matplotlib pynvml~=11.5 seaborn~=0.13 scikit-learn~=1.5 pytorch_lightning~=2.3 pynuml~=23.11
 
 RUN python3 <<EOF
-import os, re, nugraph
-path = os.path.dirname(nugraph.__file__)
+import os, re
+path = "/nugraph"
 for root, _, files in os.walk(path):
     for f in files:
         if f.endswith(".py"):
@@ -85,3 +107,5 @@ for root, _, files in os.walk(path):
                         w.write(new_content)
                     print(f"Updated: {fpath}")
 EOF
+
+ENV LD_PRELOAD="/torch_geometric/lib/libtorchscatter.so /torch_geometric/lib/libtorchsparse.so /torch_geometric/lib/libtorchcluster.so /torch_geometric/lib/libtorchsplineconv.so"
