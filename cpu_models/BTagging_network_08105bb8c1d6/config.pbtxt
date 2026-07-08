@@ -73,3 +73,10 @@ instance_group: [
   
 }  
 ]
+
+parameters {
+  key: "enable_mem_arena"
+  value: {
+    string_value: "0"
+  }
+}
