@@ -1,9 +1,10 @@
 # syntax=docker/dockerfile:experimental
 
-FROM nvcr.io/nvidia/tritonserver:26.06-py3
-# nvcc version: 13.3 ## nvcc --version
-# cudnn version: 9.23.0  ## find / -name "libcudnn*" 2>/dev/null
+FROM nvcr.io/nvidia/tritonserver:26.05-py3
+# nvcc version: 13.2 ## nvcc --version
+# cudnn version: 9.22.0  ## find / -name "libcudnn*" 2>/dev/null
 # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tritonserver
+# https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html
 
 ARG LIB_WITH_CUDA=ON
 ARG NPROC=6
@@ -28,7 +29,6 @@ RUN apt-get update -y && apt-get install -y \
   && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
-RUN pip3 install --upgrade pip
 
 # Environment variables
 ENV FORCE_CUDA=1
@@ -50,9 +50,9 @@ RUN cd /tmp && mkdir -p src \
   && rsync -ru src/ ${PREFIX} \
   && cd /tmp && rm -rf /tmp/src
 
-RUN pip3 install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+RUN pip3 install torch==2.12.0 --index-url https://download.pytorch.org/whl/cu132
 RUN ln -s "$(python3 -c 'import os, torch; print(os.path.dirname(torch.__file__))')" "${TORCH_SITE_PATH}"
-RUN pip3 install pyg_lib -f https://data.pyg.org/whl/torch-2.6.0+cu124.html
+RUN pip3 install pyg_lib -f https://data.pyg.org/whl/torch-2.12.0+cu132.html
 
 RUN mkdir -p /torch_geometric/lib \
   && cd /tmp \
@@ -71,8 +71,6 @@ RUN mkdir -p /torch_geometric/lib \
 
 RUN pip3 install torch_geometric "lightning>=2.2" numba
 
-RUN python3 -c "import torch; print(torch.__version__, torch.version.cuda)"
-
 # FRNN
 RUN cd /tmp/ \
 	&& git clone https://github.com/asnaylor/prefix_sum.git \
@@ -88,7 +86,7 @@ RUN cd /tmp/ \
 RUN  cd / && \
      git clone -b cerati/ng2-feature-extension-triton https://github.com/cerati/nugraph.git && \
      pip3 install --no-deps -e ./nugraph && \
-     pip3 install matplotlib pynvml~=11.5 seaborn~=0.13 scikit-learn~=1.5 pytorch_lightning~=2.3 pynuml~=23.11
+     pip3 install matplotlib pynvml~=11.5 seaborn~=0.13 scikit-learn~=1.5 pynuml~=23.11
 
 RUN python3 <<EOF
 import os, re
