@@ -53,16 +53,22 @@ RUN cd /tmp && mkdir -p src \
 
 RUN pip3 install torch==2.12.0 --index-url https://download.pytorch.org/whl/cu132
 RUN ln -s "$(python3 -c 'import os, torch; print(os.path.dirname(torch.__file__))')" "${TORCH_SITE_PATH}"
-RUN pip3 install pyg_lib -f https://data.pyg.org/whl/torch-2.12.0+cu132.html
 
 ENV TORCH_CUDA_ARCH_LIST="8.0"
+RUN pip3 install pyg_lib torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-2.12.0+cu132.html
+
+# torch-cluster and spline-conv are not available on the PyG wheels index, so we need to build them from source
+RUN FORCE_CUDA=1 pip3 install torch_cluster torch_spline_conv 
+
+RUN pip3 install torch_geometric "lightning>=2.2" numba
+
 RUN pip3 install ninja
 RUN mkdir -p /torch_geometric/lib
 
 # torch-scatter
 RUN cd /tmp/ && mkdir src \
 	&& ${GET} https://github.com/rusty1s/pytorch_scatter/archive/refs/tags/2.1.2.tar.gz | ${UNPACK_TO_SRC} \
-	&& cd src && FORCE_CUDA=1 MAX_JOBS==32 pip3 install torch-scatter \
+	&& cd src \
   && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
   && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
       -DWITH_CUDA=ON \
@@ -78,7 +84,7 @@ RUN cd /tmp/ && mkdir src \
 # torch sparse
 RUN cd /tmp/ && mkdir src \
 	&& ${GET} https://github.com/rusty1s/pytorch_sparse/archive/refs/tags/0.6.18.tar.gz | ${UNPACK_TO_SRC} \
-	&& cd src && FORCE_CUDA=1 pip3 install torch-sparse \
+	&& cd src \
   && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
   && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
       -DWITH_CUDA=ON \
@@ -94,7 +100,8 @@ RUN cd /tmp/ && mkdir src \
 # torch cluster
 RUN cd /tmp/ && mkdir src \
 	&& ${GET} https://github.com/rusty1s/pytorch_cluster/archive/refs/tags/1.6.3.tar.gz | ${UNPACK_TO_SRC} \
-	&& cd src && FORCE_CUDA=1 pip3 install torch-cluster \
+	&& cd src \
+  && git submodule update --init --recursive \
   && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
   && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
       -DWITH_CUDA=ON \
@@ -110,7 +117,8 @@ RUN cd /tmp/ && mkdir src \
 # torch spline conv
 RUN cd /tmp/ && mkdir src \
   && ${GET} https://github.com/rusty1s/pytorch_spline_conv/archive/refs/tags/1.2.2.tar.gz | ${UNPACK_TO_SRC} \
-  && cd src && FORCE_CUDA=1 pip3 install torch-spline-conv \
+  && cd src \
+  && git submodule update --init --recursive \
   && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
   && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
       -DWITH_CUDA=ON \
@@ -122,8 +130,6 @@ RUN cd /tmp/ && mkdir src \
   && cmake --build build --config Release --target install -j 32 \
   && mv build/*.so /torch_geometric/lib/ \
   && rm -rf /tmp/src
-
-RUN pip3 install torch_geometric "lightning>=2.2" numba
 
 # FRNN
 RUN cd /tmp/ \
