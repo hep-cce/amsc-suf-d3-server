@@ -1,14 +1,96 @@
 # syntax=docker/dockerfile:experimental
 
-FROM nvcr.io/nvidia/tritonserver:26.05-py3
+ARG SERVERBASE=25.02-py3
+
+## Build customized PyTorch backend
+FROM nvcr.io/nvidia/pytorch:${SERVERBASE} AS builder
+
+ENV FORCE_CUDA=1
+ARG LIB_WITH_CUDA=ON
+ARG NPROC=16
+
+
+# torch-scatter
+RUN cd /tmp/ && mkdir src \
+	&& ${GET} https://github.com/rusty1s/pytorch_scatter/archive/refs/tags/2.1.2.tar.gz | ${UNPACK_TO_SRC} \
+	&& cd src \
+  && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
+  && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
+      -DWITH_CUDA=ON \
+      -DCMAKE_CXX_FLAGS="-std=c++17" \
+      -DCMAKE_CUDA_FLAGS="-Xcompiler -std=c++17" \
+      -DCMAKE_CXX_COMPILER=$(which g++) \
+      -DCMAKE_C_COMPILER=$(which gcc) \
+      -S . -B build \
+  && cmake --build build --config Release --target install -j 32 \
+  && mv build/*.so /workspace/ \
+  && rm -rf /tmp/src
+
+# torch sparse
+RUN cd /tmp/ \
+	&& git clone --recursive --branch 0.6.18 https://github.com/rusty1s/pytorch_sparse.git src \
+	&& cd src \
+  && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
+  && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
+      -DWITH_CUDA=ON \
+      -DCMAKE_CXX_FLAGS="-std=c++17" \
+      -DCMAKE_CUDA_FLAGS="-Xcompiler -std=c++17" \
+      -DCMAKE_CXX_COMPILER=$(which g++) \
+      -DCMAKE_C_COMPILER=$(which gcc) \
+      -S . -B build \
+  && cmake --build build --config Release --target install -j 16 \
+  && mv build/*.so /workspace/ \
+  && rm -rf /tmp/src
+
+# torch cluster
+RUN cd /tmp/ && mkdir src \
+	&& ${GET} https://github.com/rusty1s/pytorch_cluster/archive/refs/tags/1.6.3.tar.gz | ${UNPACK_TO_SRC} \
+	&& cd src \
+  && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
+  && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
+      -DWITH_CUDA=ON \
+      -DCMAKE_CXX_FLAGS="-std=c++17" \
+      -DCMAKE_CUDA_FLAGS="-Xcompiler -std=c++17" \
+      -DCMAKE_CXX_COMPILER=$(which g++) \
+      -DCMAKE_C_COMPILER=$(which gcc) \
+      -S . -B build \
+  && cmake --build build --config Release --target install -j 16 \
+  && mv build/*.so /workspace/ \
+  && rm -rf /tmp/src
+
+# torch spline conv
+RUN cd /tmp/ && mkdir src \
+  && ${GET} https://github.com/rusty1s/pytorch_spline_conv/archive/refs/tags/1.2.2.tar.gz | ${UNPACK_TO_SRC} \
+  && cd src \
+  && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
+  && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
+      -DWITH_CUDA=ON \
+      -DCMAKE_CXX_FLAGS="-std=c++17" \
+      -DCMAKE_CUDA_FLAGS="-Xcompiler -std=c++17" \
+      -DCMAKE_CXX_COMPILER=$(which g++) \
+      -DCMAKE_C_COMPILER=$(which gcc) \
+      -S . -B build \
+  && cmake --build build --config Release --target install -j 16 \
+  && mv build/*.so /workspace/ \
+  && rm -rf /tmp/src
+
+FROM nvcr.io/nvidia/tritonserver:${SERVERBASE}
 # nvcc version: 13.2 ## nvcc --version
 # cudnn version: 9.22.0  ## find / -name "libcudnn*" 2>/dev/null
 # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tritonserver
 # https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html
 # https://github.com/lgray/triton-torchgeo-gat-example/blob/master/Dockerfile.build
 
-ARG LIB_WITH_CUDA=ON
-ARG NPROC=6
+ENV LD_LIBRARY_PATH="/opt/tritonserver/backends/pytorch:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64"
+ENV LD_PRELOAD="/torch_geometric/lib/libtorchscatter.so /torch_geometric/lib/libtorchsparse.so /torch_geometric/lib/libtorchcluster.so /torch_geometric/lib/libtorchsplineconv.so"
+
+RUN mkdir -p /torch_geometric/lib
+
+COPY --from=builder /workspace/libtorchscatter.so /torch_geometric/lib/
+COPY --from=builder /workspace/libtorchsparse.so /torch_geometric/lib/
+COPY --from=builder /workspace/libtorchcluster.so /torch_geometric/lib/
+COPY --from=builder /workspace/libtorchsplineconv.so /torch_geometric/lib/
+
 
 # Install dependencies
 # Update the CUDA Linux GPG Repository Key
@@ -34,12 +116,11 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 # Environment variables
 ENV FORCE_CUDA=1
 ENV TORCH_SITE_PATH="/opt/torch"
-ENV TORCH_LIB_PATH="${TORCH_SITE_PATH}/lib"
-ENV LD_LIBRARY_PATH="${TORCH_LIB_PATH}:/opt/tritonserver/backends/pytorch:$LD_LIBRARY_PATH:/usr/lib:/usr/local/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64"
+ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib:/usr/local/lib"
 ENV GET="curl --location --silent --create-dirs"
 ENV UNPACK_TO_SRC="tar -xz --strip-components=1 --directory src"
 ENV PREFIX="/usr/local"
-ENV TORCH_CUDA_ARCH_LIST="80"
+ENV TORCH_CUDA_ARCH_LIST="8.0"
 ENV PYTHONNOUSERSITE=True
 
 # Manual builds for specific packages
@@ -51,83 +132,11 @@ RUN cd /tmp && mkdir -p src \
   && rsync -ru src/ ${PREFIX} \
   && cd /tmp && rm -rf /tmp/src
 
-RUN pip3 install torch==2.12.0 --index-url https://download.pytorch.org/whl/cu132
-RUN ln -s "$(python3 -c 'import os, torch; print(os.path.dirname(torch.__file__))')" "${TORCH_SITE_PATH}"
+RUN pip3 install torch==2.7.0 --index-url https://download.pytorch.org/whl/cu128
 
-ENV TORCH_CUDA_ARCH_LIST="8.0"
-RUN pip3 install pyg_lib torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-2.12.0+cu132.html
-
-# torch-cluster and spline-conv are not available on the PyG wheels index, so we need to build them from source
-RUN FORCE_CUDA=1 pip3 install torch_cluster torch_spline_conv 
+RUN pip3 install pyg_lib torch_cluster torch_spline_conv torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-2.7.0+cu128.html
 
 RUN pip3 install torch_geometric "lightning>=2.2" numba
-
-RUN pip3 install ninja
-RUN mkdir -p /torch_geometric/lib
-
-# torch-scatter
-RUN cd /tmp/ && mkdir src \
-	&& ${GET} https://github.com/rusty1s/pytorch_scatter/archive/refs/tags/2.1.2.tar.gz | ${UNPACK_TO_SRC} \
-	&& cd src \
-  && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
-  && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
-      -DWITH_CUDA=ON \
-      -DCMAKE_CXX_FLAGS="-std=c++17" \
-      -DCMAKE_CUDA_FLAGS="-Xcompiler -std=c++17" \
-      -DCMAKE_CXX_COMPILER=$(which g++) \
-      -DCMAKE_C_COMPILER=$(which gcc) \
-      -S . -B build \
-  && cmake --build build --config Release --target install -j 32 \
-  && mv build/*.so /torch_geometric/lib/ \
-  && rm -rf /tmp/src
-
-# torch sparse
-RUN cd /tmp/ \
-	&& git clone --recursive --branch 0.6.18 https://github.com/rusty1s/pytorch_sparse.git src \
-	&& cd src \
-  && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
-  && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
-      -DWITH_CUDA=ON \
-      -DCMAKE_CXX_FLAGS="-std=c++17" \
-      -DCMAKE_CUDA_FLAGS="-Xcompiler -std=c++17" \
-      -DCMAKE_CXX_COMPILER=$(which g++) \
-      -DCMAKE_C_COMPILER=$(which gcc) \
-      -S . -B build \
-  && cmake --build build --config Release --target install -j 16 \
-  && mv build/*.so /torch_geometric/lib/ \
-  && rm -rf /tmp/src
-
-# torch cluster
-RUN cd /tmp/ && mkdir src \
-	&& ${GET} https://github.com/rusty1s/pytorch_cluster/archive/refs/tags/1.6.3.tar.gz | ${UNPACK_TO_SRC} \
-	&& cd src \
-  && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
-  && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
-      -DWITH_CUDA=ON \
-      -DCMAKE_CXX_FLAGS="-std=c++17" \
-      -DCMAKE_CUDA_FLAGS="-Xcompiler -std=c++17" \
-      -DCMAKE_CXX_COMPILER=$(which g++) \
-      -DCMAKE_C_COMPILER=$(which gcc) \
-      -S . -B build \
-  && cmake --build build --config Release --target install -j 16 \
-  && mv build/*.so /torch_geometric/lib/ \
-  && rm -rf /tmp/src
-
-# torch spline conv
-RUN cd /tmp/ && mkdir src \
-  && ${GET} https://github.com/rusty1s/pytorch_spline_conv/archive/refs/tags/1.2.2.tar.gz | ${UNPACK_TO_SRC} \
-  && cd src \
-  && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
-  && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
-      -DWITH_CUDA=ON \
-      -DCMAKE_CXX_FLAGS="-std=c++17" \
-      -DCMAKE_CUDA_FLAGS="-Xcompiler -std=c++17" \
-      -DCMAKE_CXX_COMPILER=$(which g++) \
-      -DCMAKE_C_COMPILER=$(which gcc) \
-      -S . -B build \
-  && cmake --build build --config Release --target install -j 16 \
-  && mv build/*.so /torch_geometric/lib/ \
-  && rm -rf /tmp/src
 
 # FRNN
 RUN cd /tmp/ \
@@ -163,5 +172,3 @@ for root, _, files in os.walk(path):
                         w.write(new_content)
                     print(f"Updated: {fpath}")
 EOF
-
-ENV LD_PRELOAD="/torch_geometric/lib/libtorchscatter.so /torch_geometric/lib/libtorchsparse.so /torch_geometric/lib/libtorchcluster.so /torch_geometric/lib/libtorchsplineconv.so"
