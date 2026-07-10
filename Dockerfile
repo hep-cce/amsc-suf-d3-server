@@ -82,8 +82,8 @@ RUN cd /tmp/ && mkdir src \
   && rm -rf /tmp/src
 
 # torch sparse
-RUN cd /tmp/ && mkdir src \
-	&& ${GET} https://github.com/rusty1s/pytorch_sparse/archive/refs/tags/0.6.18.tar.gz | ${UNPACK_TO_SRC} \
+RUN cd /tmp/ \
+	&& git clone --recursive --branch 0.6.18 https://github.com/rusty1s/pytorch_sparse.git src \
 	&& cd src \
   && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
   && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
