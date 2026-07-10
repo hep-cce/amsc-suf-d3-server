@@ -93,7 +93,7 @@ RUN cd /tmp/ \
       -DCMAKE_CXX_COMPILER=$(which g++) \
       -DCMAKE_C_COMPILER=$(which gcc) \
       -S . -B build \
-  && cmake --build build --config Release --target install -j 32 \
+  && cmake --build build --config Release --target install -j 16 \
   && mv build/*.so /torch_geometric/lib/ \
   && rm -rf /tmp/src
 
@@ -101,7 +101,6 @@ RUN cd /tmp/ \
 RUN cd /tmp/ && mkdir src \
 	&& ${GET} https://github.com/rusty1s/pytorch_cluster/archive/refs/tags/1.6.3.tar.gz | ${UNPACK_TO_SRC} \
 	&& cd src \
-  && git submodule update --init --recursive \
   && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
   && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
       -DWITH_CUDA=ON \
@@ -110,7 +109,7 @@ RUN cd /tmp/ && mkdir src \
       -DCMAKE_CXX_COMPILER=$(which g++) \
       -DCMAKE_C_COMPILER=$(which gcc) \
       -S . -B build \
-  && cmake --build build --config Release --target install -j 32 \
+  && cmake --build build --config Release --target install -j 16 \
   && mv build/*.so /torch_geometric/lib/ \
   && rm -rf /tmp/src
 
@@ -118,7 +117,6 @@ RUN cd /tmp/ && mkdir src \
 RUN cd /tmp/ && mkdir src \
   && ${GET} https://github.com/rusty1s/pytorch_spline_conv/archive/refs/tags/1.2.2.tar.gz | ${UNPACK_TO_SRC} \
   && cd src \
-  && git submodule update --init --recursive \
   && sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
   && cmake -DCMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)") \
       -DWITH_CUDA=ON \
@@ -127,7 +125,7 @@ RUN cd /tmp/ && mkdir src \
       -DCMAKE_CXX_COMPILER=$(which g++) \
       -DCMAKE_C_COMPILER=$(which gcc) \
       -S . -B build \
-  && cmake --build build --config Release --target install -j 32 \
+  && cmake --build build --config Release --target install -j 16 \
   && mv build/*.so /torch_geometric/lib/ \
   && rm -rf /tmp/src
 
