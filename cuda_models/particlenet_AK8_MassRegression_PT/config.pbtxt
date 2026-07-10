@@ -1,5 +1,5 @@
 name: "particlenet_AK8_MassRegression_PT"
-platform: "pytorch_libtorch"
+platform: "onnxruntime_onnx"
 max_batch_size: 200
 input [{
   name: "pf_points__0"
@@ -44,8 +44,8 @@ model_repository_agents {
   agents [{
     name: "checksum"
     parameters {
-      key: "MD5:1/model.pt"
-      value: "23ca7010720c682ead36c08d2d730b6a"
+      key: "MD5:1/model.onnx"
+      value: "77a197aa86b906683117467278f4e571"
     }
   }]
 }

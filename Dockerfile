@@ -9,6 +9,8 @@ ENV FORCE_CUDA=1
 ARG LIB_WITH_CUDA=ON
 ARG NPROC=16
 
+ENV GET="curl --location --silent --create-dirs"
+ENV UNPACK_TO_SRC="tar -xz --strip-components=1 --directory src"
 
 # torch-scatter
 RUN cd /tmp/ && mkdir src \

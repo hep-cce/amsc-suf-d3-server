@@ -1,5 +1,5 @@
 name: "particlenet_PT"
-platform: "pytorch_libtorch"
+platform: "onnxruntime_onnx"
 max_batch_size: 160
 input [{
   name: "pf_points__0"
@@ -44,8 +44,8 @@ model_repository_agents {
   agents [{
     name: "checksum"
     parameters {
-      key: "MD5:1/model.pt"
-      value: "a5b29f593329a6ecc67991b711ad7d07"
+      key: "MD5:1/model.onnx"
+      value: "ec55632d6384592044d3e3cb0371dda4"
     }
   }]
 }
