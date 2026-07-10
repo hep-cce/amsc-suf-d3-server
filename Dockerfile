@@ -98,20 +98,7 @@ COPY --from=builder /workspace/libtorchsplineconv.so /torch_geometric/lib/
 # Update the CUDA Linux GPG Repository Key
 RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
 
-# See also https://root.cern.ch/build-prerequisites
-# https://root.cern/install/dependencies/#ubuntu-and-other-debian-based-distributions
-RUN apt-get update -y && apt-get install -y \
-    build-essential curl git freeglut3-dev libfreetype6-dev libpcre3-dev \
-    libtbb-dev ninja-build time tree \
-    python3 python3-dev python3-pip python3-numpy \
-    rsync zlib1g-dev ccache vim unzip libblas-dev liblapack-dev swig rapidjson-dev \
-    libexpat-dev libeigen3-dev libftgl-dev libgl2ps-dev libglew-dev libgsl-dev \
-    liblz4-dev liblzma-dev libx11-dev libxext-dev libxft-dev libxpm-dev libxerces-c-dev \
-    libzstd-dev libb64-dev graphviz gfortran  libglu1-mesa-dev  \
-    libfftw3-dev libcfitsio-dev libgraphviz-dev \
-    libavahi-compat-libdnssd-dev libldap2-dev libxml2-dev libkrb5-dev \
-     qtwebengine5-dev nlohmann-json3-dev libmysqlclient-dev libxxhash-dev \
-  && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get install -y rsync && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
