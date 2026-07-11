@@ -35,14 +35,6 @@ model_repository_agents {
     name: "checksum"
     parameters {
       key: "MD5:1/model.graphdef"
-      value: "9fdc487afe835467983c0bb0b2d50c3f"
-    }
-    parameters {
-      key: "MD5:2/model.graphdef"
-      value: "97b53089661709e24c7407d129d24e2e"
-    }
-    parameters {
-      key: "MD5:3/model.graphdef"
       value: "111604a59f237dd49756fbfed24990db"
     }
   }]

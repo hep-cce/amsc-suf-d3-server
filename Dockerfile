@@ -84,7 +84,6 @@ FROM nvcr.io/nvidia/tritonserver:${SERVERBASE}
 # https://github.com/lgray/triton-torchgeo-gat-example/blob/master/Dockerfile.build
 
 ENV LD_LIBRARY_PATH="/opt/tritonserver/backends/pytorch:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64"
-ENV LD_PRELOAD="/torch_geometric/lib/libtorchscatter.so /torch_geometric/lib/libtorchsparse.so /torch_geometric/lib/libtorchcluster.so /torch_geometric/lib/libtorchsplineconv.so"
 
 RUN mkdir -p /torch_geometric/lib
 
@@ -123,7 +122,7 @@ RUN cd /tmp && mkdir -p src \
 
 RUN pip3 install torch==2.7.0 --index-url https://download.pytorch.org/whl/cu128
 
-RUN pip3 install pyg_lib torch_cluster torch_spline_conv torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-2.7.0+cu128.html
+RUN pip3 install "numpy<2" pyg_lib torch_cluster torch_spline_conv torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-2.7.0+cu128.html
 
 RUN pip3 install torch_geometric "lightning>=2.2" numba
 
