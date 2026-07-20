@@ -1,5 +1,5 @@
 name: "deeptau_2018v2p5"
-platform: "tensorflow_graphdef"
+platform: "onnxruntime_onnx"
 max_batch_size: 1000
 input [{
   name: "input_tau"
@@ -42,8 +42,8 @@ model_repository_agents {
   agents [{
     name: "checksum"
     parameters {
-      key: "MD5:1/model.graphdef"
-      value: "36b6a7de2140ca1d3a60d7d3efc2baa3"
+      key: "MD5:1/model.onnx"
+      value: "a59233a7b6e828e319529564931c5662"
     }
   }]
 }

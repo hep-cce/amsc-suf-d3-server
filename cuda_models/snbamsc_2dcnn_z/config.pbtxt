@@ -1,5 +1,5 @@
 name: "snbamsc_2dcnn_z"
-platform: "tensorflow_savedmodel"
+platform: "onnxruntime_onnx"
 
 
 max_batch_size: 64
@@ -24,3 +24,13 @@ output [
 instance_group [
   { kind: KIND_GPU count: 1 }
 ]
+
+model_repository_agents {
+  agents [{
+    name: "checksum"
+    parameters {
+      key: "MD5:1/model.onnx"
+      value: "1ce50dba6561b9770dabe763a69de91a"
+    }
+  }]
+}
