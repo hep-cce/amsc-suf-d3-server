@@ -1,5 +1,5 @@
 name: "deepmet"
-platform: "tensorflow_graphdef"
+platform: "onnxruntime_onnx"
 version_policy {
   all {
   }
@@ -34,8 +34,8 @@ model_repository_agents {
   agents [{
     name: "checksum"
     parameters {
-      key: "MD5:1/model.graphdef"
-      value: "111604a59f237dd49756fbfed24990db"
+      key: "MD5:1/model.onnx"
+      value: "524bbefcdea06d5e8971aa31929549aa"
     }
   }]
 }

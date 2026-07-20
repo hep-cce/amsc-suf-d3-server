@@ -17,3 +17,17 @@ checksum in `config.pbtxt`.
 
 The source `.pt` files are intentionally retained for reproducibility and
 numerical comparisons.
+
+## TensorFlow to ONNX
+
+Run the converter with Python 3.11:
+
+```bash
+python3 -m pip install -r converions/requirements-tensorflow.txt
+python3 converions/convert_tensorflow.py
+```
+
+The converter handles both frozen GraphDefs and SavedModels, preserves the
+Triton input and output names, validates each ONNX graph, compares its output
+with TensorFlow for a dynamic batch, and updates the Triton platform and
+checksum. The TensorFlow sources are retained for reproducibility.
