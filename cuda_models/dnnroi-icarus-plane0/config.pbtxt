@@ -1,5 +1,5 @@
 name: "dnnroi-icarus-plane0"
-platform: "pytorch_libtorch"
+platform: "onnxruntime_onnx"
 max_batch_size: 1
 
 input [
