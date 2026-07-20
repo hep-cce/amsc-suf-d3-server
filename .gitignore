@@ -208,3 +208,4 @@ __marimo__/
 
 staged_models/
 triton_ready.txt
+.DS_Store
