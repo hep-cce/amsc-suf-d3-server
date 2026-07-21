@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Check TorchScript (.pt) and ONNX (.onnx) models for BatchNorm nodes
-stuck in training mode.
+"""Check TorchScript (.pt) and ONNX (.onnx) models for invalid BatchNorm nodes.
 
 Usage:
     python check_batchnorm.py model.pt [model2.onnx ...]
@@ -8,7 +7,7 @@ Usage:
 
 Exit codes:
     0 — all models OK
-    1 — at least one model has BatchNorm in training mode
+    1 — at least one model has an invalid BatchNorm node
 """
 
 import argparse
@@ -16,7 +15,7 @@ import sys
 from pathlib import Path
 
 
-def check_torchscript(path: str) -> list[dict]:
+def check_torchscript(path):
     import torch
 
     model = torch.jit.load(path, map_location="cpu")
@@ -53,20 +52,24 @@ def check_torchscript(path: str) -> list[dict]:
     return findings
 
 
-def check_onnx(path: str) -> list[dict]:
+def check_onnx(path):
     import onnx
 
     model = onnx.load(path)
-    opset = max((o.version for o in model.opset_import), default=0)
+    opset = next((o.version for o in model.opset_import if not o.domain), 0)
     findings = []
     for node in model.graph.node:
         if node.op_type != "BatchNormalization":
             continue
-        for attr in node.attribute:
-            if attr.name == "training_mode" and attr.i == 1:
-                findings.append(
-                    {"node": node.name, "opset": opset, "critical": opset >= 14}
-                )
+        training_mode = next(
+            (attr.i for attr in node.attribute if attr.name == "training_mode"), 0
+        )
+        if training_mode == 1:
+            findings.append({"node": node.name, "opset": opset, "reason": "training"})
+        elif opset >= 14 and len(node.output) != 1:
+            findings.append(
+                {"node": node.name, "opset": opset, "reason": "inference_outputs"}
+            )
     return findings
 
 
@@ -99,21 +102,24 @@ def main():
         elif suffix == ".onnx":
             findings = check_onnx(str(p))
             if findings:
-                critical = [f for f in findings if f.get("critical")]
-                if critical:
-                    has_error = True
-                    tag = "FAIL"
-                else:
-                    tag = "WARN"
+                has_error = True
                 opset = findings[0]["opset"]
                 print(
-                    f"{tag}  {p}: {len(findings)} BatchNormalization node(s) "
-                    f"with training_mode=1 (opset {opset})"
+                    f"FAIL  {p}: {len(findings)} invalid BatchNormalization "
+                    f"node(s) (opset {opset})"
                 )
-                if critical:
+                training = [f for f in findings if f["reason"] == "training"]
+                inference_outputs = [
+                    f for f in findings if f["reason"] == "inference_outputs"
+                ]
+                if training:
                     print(
-                        "        ONNX Runtime CUDA EP does not support "
-                        "training_mode=1 at opset >= 14"
+                        f"        {len(training)} node(s) have training_mode=1"
+                    )
+                if inference_outputs:
+                    print(
+                        f"        {len(inference_outputs)} inference node(s) have "
+                        "more than one output"
                     )
             else:
                 print(f"OK    {p}")
