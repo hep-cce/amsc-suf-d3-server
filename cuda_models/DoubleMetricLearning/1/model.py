@@ -106,6 +106,17 @@ class TritonPythonModel:
         # Every Python backend must iterate over everyone of the requests
         # and create a pb_utils.InferenceResponse for each of them.
         for request in requests:
+            if request.is_cancelled():
+                responses.append(
+                    pb_utils.InferenceResponse(
+                        error=pb_utils.TritonError(
+                            "Request cancelled before execution",
+                            pb_utils.TritonError.CANCELLED,
+                        )
+                    )
+                )
+                continue
+
             features = pb_utils.get_input_tensor_by_name(request, "FEATURES")
             features = from_dlpack(features.to_dlpack()).to(self.device)
             if self.debug:
